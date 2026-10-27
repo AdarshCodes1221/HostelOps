@@ -1,0 +1,86 @@
+# ==============================================================================
+# Git Ignore Configuration - Full-Stack Hostel Management System
+# ==============================================================================
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment Variables & Secrets (NEVER commit real .env files)
+.env
+.env.*
+!.env.example
+*.env
+*.env.local
+backend/.env
+backend/.env.local
+frontend/.env
+frontend/.env.local
+
+# Production Build Output
+dist/
+build/
+*/dist/
+*/build/
+
+# Backups, Database Dumps & Scratch Artifacts
+backend/backups/
+backend/backup-students/
+backups_pre_restructure/
+local_scratch_scripts/
+*.bak
+*.tmp
+*.dump
+
+# User Uploads (Preserve directory structure via .gitkeep)
+backend/uploads/mess-menu/*
+!backend/uploads/mess-menu/.gitkeep
+backend/uploads/profile-images/*
+!backend/uploads/profile-images/.gitkeep
+backend/uploads/bus-routes/*
+!backend/uploads/bus-routes/.gitkeep
+backend/uploads/notices/*
+!backend/uploads/notices/.gitkeep
+
+# Logs & Temporary Files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.tempmediaStorage/
+.cache/
+
+# OS Specific & Editor Artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude/
+.gemini/
+
+# Local-only destructive and test maintenance scripts
+backend/delete-all-students.js
+backend/deleteUsers.js
+backend/cleanStudents.js
+backend/cleanStudents.js
+backend/clean-dummy-students.js
+backend/clean-dummy-complaints.js
+backend/clean-test-staff.js
+backend/reset-staff-passwords.js
+backend/restoreRealData.js
+backend/backup-db.js
+backend/migrate-staff-to-safe-emails.js
+backend/bind-test-recovery-email.js
+backend/createAdmin.js
+backend/setPassword.js
+backend/updatePasswords.js
+backend/seed-qa-users.js
+backend/seed-test-notifications.js
+backend/inspect-*.js
+backend/check-all-staff.js
+backend/checkWardens.js
+backend/test-*.js
+backend/verify-*.js

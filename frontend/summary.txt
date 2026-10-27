@@ -1,0 +1,13 @@
+Summary of frontend routing, role-based navigation, and page components:
+1. Auth Context:
+   - User role stored in AuthContext as part of user object (role: 'student' | 'admin' | 'warden')
+2. Route Protection (ProtectedRoute):
+   - Wraps components to protect routes
+   - Public routes: accessible without authentication (e.g., /, /login, /forgot-password, etc.)
+   - Protected routes: require authentication (using ProtectedRoute without requireAdmin)
+   - Admin-only routes: require authentication and admin role (using ProtectedRoute with requireAdmin={true})
+3. Navigation Components:
+   - Navigation bar shows:
+     - Always visible nav items (for authenticated users): Home, Complaints, Outpass, Mess Menu, Bus Routes, Notices
+     - Admin-only button: Admin Dashboard (Shield icon) visible only if isAdmin is true (role admin or warden)
+     - Profile button: shows user's firstName or email prefix, always visible when authenticated

@@ -1,0 +1,28 @@
+{
+  "name": "hostel-management-system",
+  "version": "1.0.0",
+  "description": "Full-Stack Accommodation Management Platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "start": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"npm run start --prefix backend\" \"npm run preview --prefix frontend\"",
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npm run dev --prefix frontend",
+    "test": "npm run test --prefix backend",
+    "build": "npm run build --prefix frontend"
+  },
+  "keywords": [
+    "hostel-management",
+    "accommodation-system",
+    "full-stack",
+    "react",
+    "node",
+    "express",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
