@@ -145,7 +145,7 @@ SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=587
 SMTP_USER=your_smtp_login
 SMTP_PASSWORD=your_smtp_password
-MAIL_FROM=Symbiosis HMS <noreply@your-domain.com>
+MAIL_FROM= HMS <noreply@your-domain.com>
 ```
 
 > **Security Note:** Never commit `.env` to version control. See [SECURITY.md](SECURITY.md).
