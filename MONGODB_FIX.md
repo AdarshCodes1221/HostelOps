@@ -50,7 +50,7 @@ mongod --dbpath "C:\data\db"
 ### Step 3: Update Backend .env
 ```env
 # Replace this line in backend/.env
-MONGO_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/hostelManagementSystem?retryWrites=true&w=majority
+
 ```
 
 ### Step 4: Whitelist Your IP
@@ -172,18 +172,6 @@ Or manually in MongoDB:
 // Connect to MongoDB
 use hostelManagementSystem
 
-// Create admin user
-db.users.insertOne({
-  firstName: "Admin",
-  lastName: "User", 
-  email: "admin@siu.edu.in",
-  password: "$2a$10$rqQvDgNXHbkV5.lNNa/vXOvZ4Nh9YqxjxqQ/xJx8VqK4r7xmKh0Mu", // This is "admin123" hashed
-  role: "admin",
-  createdAt: new Date()
-})
-
-// Verify
-db.users.find()
 ```
 
 Now try logging in again! 🎉
