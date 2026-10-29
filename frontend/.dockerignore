@@ -1,7 +1,10 @@
 node_modules
 dist
 .env
-.env.local
+.env.*
 .git
 .github
 *.log
+.vscode
+.idea
+*.bak

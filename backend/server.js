@@ -53,24 +53,48 @@ app.use(
   })
 );
 
-// 2. CORS configuration
+// 2. CORS configuration (supports Netlify, Render, and custom frontend URLs)
+const envOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:8080',
+  process.env.FRONTEND_URL,
+  process.env.APP_BASE_URL,
+  ...envOrigins,
   'http://localhost:8080',
   'http://127.0.0.1:8080',
+  'http://localhost:8081',
+  'http://127.0.0.1:8081',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:3000',
-];
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-        callback(null, true);
-      } else {
-        callback(new Error('Blocked by CORS policy'));
+      // 1. Allow non-browser requests (mobile apps, curl, health checks)
+      if (!origin) return callback(null, true);
+
+      // 2. Allow all origins during local development/testing
+      if (process.env.NODE_ENV !== 'production') return callback(null, true);
+
+      // 3. Exact match with configured allowed origins
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      // 4. Pattern match: any Netlify frontend deployment (production or preview branch)
+      try {
+        const url = new URL(origin);
+        if (url.hostname.endsWith('.netlify.app') || url.hostname.endsWith('.onrender.com')) {
+          return callback(null, true);
+        }
+      } catch (e) {
+        // invalid URL formatting
       }
+
+      callback(new Error(`Origin ${origin} blocked by CORS policy`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

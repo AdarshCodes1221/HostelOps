@@ -2,9 +2,16 @@ node_modules
 npm-debug.log
 .env
 .env.local
-.env.*.local
+.env.*
 .git
 .github
 tests
 coverage
 *.log
+uploads
+backups
+backup-students
+*.backup.json
+*.bak
+.vscode
+.idea
