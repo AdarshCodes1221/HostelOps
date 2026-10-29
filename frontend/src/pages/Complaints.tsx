@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Navigation } from '@/components/ui/navigation';
 import Footer from '@/components/ui/footer';
@@ -100,7 +100,7 @@ const Complaints: React.FC = () => {
         });
       }
     }
-  }, [isLoading, searchParams, complaints]);
+  }, [isLoading, searchParams, complaints, toast]);
 
   const [formData, setFormData] = useState<{
     title: string;
@@ -115,21 +115,13 @@ const Complaints: React.FC = () => {
   const { toast } = useToast();
   const { isAdmin, user } = useAuth();
 
-  useEffect(() => {
-    if (isAdmin) {
-      fetchAdminComplaints();
-    } else {
-      fetchMyComplaints();
-    }
-  }, [isAdmin]);
-
-  const fetchMyComplaints = async () => {
+  const fetchMyComplaints = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await authenticatedFetch(API_ENDPOINTS.COMPLAINTS_MY);
       const data = await response.json();
       setComplaints(data.data || []);
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to load complaints',
@@ -138,15 +130,15 @@ const Complaints: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
-  const fetchAdminComplaints = async () => {
+  const fetchAdminComplaints = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await authenticatedFetch(API_ENDPOINTS.ADMIN_COMPLAINTS);
       const data = await response.json();
       setComplaints(data.data || []);
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to load all complaints',
@@ -155,7 +147,15 @@ const Complaints: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAdminComplaints();
+    } else {
+      fetchMyComplaints();
+    }
+  }, [isAdmin, fetchAdminComplaints, fetchMyComplaints]);
 
   const handleComplaintSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

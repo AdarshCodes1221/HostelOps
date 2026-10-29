@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,7 @@ const VerifyEmail: React.FC = () => {
 
   const { toast } = useToast();
 
-  const handleVerify = async (codeOrToken: string, targetEmail?: string) => {
+  const handleVerify = useCallback(async (codeOrToken: string, targetEmail?: string) => {
     const cleanCode = (codeOrToken || '').trim();
     if (!cleanCode) {
       setStatus('error');
@@ -70,17 +70,17 @@ const VerifyEmail: React.FC = () => {
         setStatus('error');
         setMessage(data.message || 'Verification code is invalid, expired, or has already been used.');
       }
-    } catch (err: any) {
+    } catch {
       setStatus('error');
       setMessage('Network error. Unable to connect to verification service.');
     }
-  };
+  }, [resendEmail, toast]);
 
   useEffect(() => {
     if (token) {
       handleVerify(token);
     }
-  }, [token]);
+  }, [token, handleVerify]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Navigation } from '@/components/ui/navigation';
 import Footer from '@/components/ui/footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,12 +51,7 @@ const BusRoutes = () => {
     active: true
   });
 
-  useEffect(() => {
-    fetchRoutes();
-    fetchBusRouteImage();
-  }, []);
-
-  const fetchRoutes = async () => {
+  const fetchRoutes = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await authenticatedFetch(API_ENDPOINTS.BUS_ROUTES_ALL);
@@ -81,9 +76,9 @@ const BusRoutes = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
-  const fetchBusRouteImage = async () => {
+  const fetchBusRouteImage = useCallback(async () => {
     try {
       setIsImageLoading(true);
       const response = await authenticatedFetch(API_ENDPOINTS.BUS_ROUTES_IMAGE);
@@ -100,7 +95,12 @@ const BusRoutes = () => {
     } finally {
       setIsImageLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRoutes();
+    fetchBusRouteImage();
+  }, [fetchRoutes, fetchBusRouteImage]);
 
   const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;

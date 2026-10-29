@@ -380,10 +380,10 @@ const Profile = () => {
         title: 'Verification Code Sent',
         description: `A 6-digit code was sent to ${newRecoveryEmail}. Check your inbox.`,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: 'Error sending code',
-        description: err.message || 'Could not send verification code.',
+        description: err instanceof Error ? err.message : 'Could not send verification code.',
         variant: 'destructive',
       });
     } finally {
@@ -423,10 +423,10 @@ const Profile = () => {
         title: 'Recovery Email Verified!',
         description: 'Your personal recovery email has been securely linked and verified.',
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: 'Verification failed',
-        description: err.message || 'Invalid or expired verification code.',
+        description: err instanceof Error ? err.message : 'Invalid or expired verification code.',
         variant: 'destructive',
       });
     } finally {

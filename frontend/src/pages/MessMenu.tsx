@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Navigation } from '@/components/ui/navigation';
 import Footer from '@/components/ui/footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -42,11 +42,7 @@ const MessMenu = () => {
   const [weekStartDate, setWeekStartDate] = useState('');
   const [imageError, setImageError] = useState(false);
 
-  useEffect(() => {
-    fetchLatestMenuImage();
-  }, []);
-
-  const fetchLatestMenuImage = async () => {
+  const fetchLatestMenuImage = useCallback(async () => {
     try {
       setIsLoading(true);
       setImageError(false);
@@ -72,10 +68,10 @@ const MessMenu = () => {
       const data = await response.json();
 
       if (response.ok && Array.isArray(data?.data) && data.data.length > 0) {
-        const withImages = data.data.filter((m: any) => m && m.imageUrl);
+        const withImages = (data.data as MenuImage[]).filter((m: MenuImage) => m && m.imageUrl);
         if (withImages.length > 0) {
           const sorted = withImages.sort(
-            (a: any, b: any) =>
+            (a: MenuImage, b: MenuImage) =>
               new Date(b.updatedAt || b.createdAt || 0).getTime() -
               new Date(a.updatedAt || a.createdAt || 0).getTime()
           );
@@ -102,7 +98,11 @@ const MessMenu = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchLatestMenuImage();
+  }, [fetchLatestMenuImage]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;

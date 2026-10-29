@@ -109,7 +109,7 @@ const Login = () => {
       hasUpperCase: /[A-Z]/.test(password),
       hasLowerCase: /[a-z]/.test(password),
       hasNumber: /[0-9]/.test(password),
-      hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+      hasSpecialChar: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
     });
   };
 
@@ -354,7 +354,7 @@ const Login = () => {
         return;
       }
 
-      const cleanPhone = phone.trim().replace(/[\s\-\(\)]/g, '');
+      const cleanPhone = phone.trim().replace(/[\s\-()]/g, '');
       if (!/^[0-9]{10}$/.test(cleanPhone)) {
         toast({
           title: "Validation Error",

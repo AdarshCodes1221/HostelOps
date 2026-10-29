@@ -35,10 +35,25 @@ import studyImage from '@/assets/hostel-life/study.jpg';
 import hostelsBg from '@/assets/our-hostels-bg.jpeg';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface RoomType {
+  type: string;
+  description: string;
+}
+
+interface HostelInfo {
+  name: string;
+  floors: number;
+  capacity: string;
+  amenities: string[];
+  extraAmenities: string[];
+  description: string;
+  roomTypes: RoomType[];
+}
+
 const Index = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
-  const [selectedHostel, setSelectedHostel] = useState<any>(null);
+  const [selectedHostel, setSelectedHostel] = useState<HostelInfo | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
 
@@ -588,7 +603,7 @@ const Index = () => {
                 <div>
                   <h3 className="text-xl font-bold mb-3">Room Types</h3>
                   <div className="space-y-3">
-                    {selectedHostel.roomTypes.map((room: any, idx: number) => (
+                    {selectedHostel.roomTypes.map((room: RoomType, idx: number) => (
                       <div
                         key={idx}
                         className="p-4 rounded-lg border border-border bg-card hover:border-primary/50 transition-colors"

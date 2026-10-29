@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCheck, Loader2, Info, AlertTriangle, CheckCircle2, MessageSquare, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ export const NotificationBell: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
       const res = await authenticatedFetch(API_ENDPOINTS.NOTIFICATIONS_UNREAD_COUNT);
@@ -40,10 +40,10 @@ export const NotificationBell: React.FC = () => {
         const data = await res.json();
         setUnreadCount(data.unreadCount || 0);
       }
-    } catch (err) {
+    } catch {
       // Background poll silently fails
     }
-  };
+  }, [isAuthenticated]);
 
   const fetchNotifications = async () => {
     if (!isAuthenticated) return;
@@ -68,7 +68,7 @@ export const NotificationBell: React.FC = () => {
       const timer = setInterval(fetchUnreadCount, 30000);
       return () => clearInterval(timer);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchUnreadCount]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);

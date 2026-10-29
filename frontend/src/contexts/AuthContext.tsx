@@ -152,14 +152,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    const isValidUser = (candidate: any) => {
+    const isValidUser = (candidate: unknown): candidate is User => {
       return !!(
         candidate &&
-        candidate._id &&
-        candidate.role &&
-        candidate.email &&
-        candidate.firstName &&
-        candidate.lastName
+        typeof candidate === 'object' &&
+        '_id' in candidate &&
+        'role' in candidate &&
+        'email' in candidate &&
+        'firstName' in candidate &&
+        'lastName' in candidate
       );
     };
 

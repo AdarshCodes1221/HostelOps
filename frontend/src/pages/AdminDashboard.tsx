@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -177,13 +177,52 @@ interface GateAttendanceData {
   movements: GateMovement[];
 }
 
+interface AdminUserRecord {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  prn?: string;
+  phone?: string;
+  hostel?: string;
+  roomNumber?: string;
+  status?: string;
+  createdAt: string;
+  roomLocked?: boolean;
+}
+
+interface AdminOutpassRecord {
+  _id: string;
+  passCode?: string;
+  student?: {
+    _id?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    prn?: string;
+    phone?: string;
+    hostel?: string;
+    roomNumber?: string;
+  };
+  reason?: string;
+  destination?: string;
+  status: string;
+  outDate?: string;
+  inDate?: string;
+  actualOutTime?: string;
+  actualInTime?: string;
+  createdAt: string;
+  adminRemarks?: string;
+}
+
 interface NoticeRecord {
   _id: string;
   title: string;
   description: string;
   imageUrl?: string;
   createdAt: string;
-  uploadedBy?: any;
+  uploadedBy?: { _id?: string; firstName?: string; lastName?: string; email?: string } | string;
 }
 
 interface MessMenuRecord {
@@ -227,13 +266,13 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
   // Core Data States
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [roomsByHostel, setRoomsByHostel] = useState<RoomsByHostel[]>([]);
-  const [users, setUsers] = useState<Array<any>>([]);
+  const [users, setUsers] = useState<AdminUserRecord[]>([]);
   const [usersTotal, setUsersTotal] = useState(0);
   const [usersPage, setUsersPage] = useState(1);
   const [userRoleFilter, setUserRoleFilter] = useState('all');
   const [userSearchTerm, setUserSearchTerm] = useState('');
-  const [pendingStudents, setPendingStudents] = useState<Array<any>>([]);
-  const [adminOutpasses, setAdminOutpasses] = useState<Array<any>>([]);
+  const [pendingStudents, setPendingStudents] = useState<AdminUserRecord[]>([]);
+  const [adminOutpasses, setAdminOutpasses] = useState<AdminOutpassRecord[]>([]);
   const [outpassStatusFilter, setOutpassStatusFilter] = useState('all');
   const [outpassSearch, setOutpassSearch] = useState('');
   const [gateAttendance, setGateAttendance] = useState<GateAttendanceData | null>(null);
@@ -251,11 +290,11 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
 
   // Student PRN Search (Central Quick Action)
   const [searchPRN, setSearchPRN] = useState('');
-  const [searchedStudent, setSearchedStudent] = useState<any>(null);
+  const [searchedStudent, setSearchedStudent] = useState<AdminUserRecord | null>(null);
 
   // Modals State
   // 1. Room Allocation Dialog
-  const [selectedStudentForAllocation, setSelectedStudentForAllocation] = useState<any>(null);
+  const [selectedStudentForAllocation, setSelectedStudentForAllocation] = useState<AdminUserRecord | null>(null);
   const [allocationHostel, setAllocationHostel] = useState('');
   const [allocationFloor, setAllocationFloor] = useState('1');
   const [allocationRoomNumber, setAllocationRoomNumber] = useState('');
@@ -263,19 +302,19 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
   const [isAllocating, setIsAllocating] = useState(false);
 
   // 2. Reject Student Registration Dialog
-  const [selectedStudentForReject, setSelectedStudentForReject] = useState<any>(null);
+  const [selectedStudentForReject, setSelectedStudentForReject] = useState<AdminUserRecord | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
 
   // 3. Outpass Review & Decision Dialog
-  const [selectedOutpass, setSelectedOutpass] = useState<any>(null);
+  const [selectedOutpass, setSelectedOutpass] = useState<AdminOutpassRecord | null>(null);
   const [isOutpassReviewOpen, setIsOutpassReviewOpen] = useState(false);
   const [outpassAdminRemarks, setOutpassAdminRemarks] = useState('');
   const [isOutpassRejectReasonOpen, setIsOutpassRejectReasonOpen] = useState(false);
   const [outpassRejectReason, setOutpassRejectReason] = useState('');
 
   // 4. Add Room Occupant Dialog
-  const [selectedRoomForOccupant, setSelectedRoomForOccupant] = useState<any>(null);
+  const [selectedRoomForOccupant, setSelectedRoomForOccupant] = useState<RoomRecord | null>(null);
   const [newOccupantUserId, setNewOccupantUserId] = useState('');
   const [isAddOccupantOpen, setIsAddOccupantOpen] = useState(false);
 
@@ -324,10 +363,10 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
     if (hostelParam && hostelParam !== selectedHostel) {
       setSelectedHostel(hostelParam);
     }
-  }, [searchParams]);
+  }, [searchParams, activeTab, selectedHostel]);
 
   // Primary Fetch Function
-  const fetchAllData = async (hostelFilter = selectedHostel, showToast = false) => {
+  const fetchAllData = useCallback(async (hostelFilter = selectedHostel, showToast = false) => {
     try {
       setRefreshing(true);
       const queryHostel = hostelFilter !== 'all' ? `?hostel=${encodeURIComponent(hostelFilter)}` : '';
@@ -410,23 +449,64 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
           description: `Loaded real operational records for ${hostelFilter === 'all' ? 'All Hostels' : hostelFilter}.`,
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching admin dashboard data:", err);
+      const message = err instanceof Error ? err.message : "Failed to load admin records from database.";
       toast({
         title: "Connection Error",
-        description: err.message || "Failed to load admin records from database.",
+        description: message,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [selectedHostel, userRoleFilter, userSearchTerm, usersPage, toast]);
 
   // Re-fetch when hostel or tab changes
   useEffect(() => {
     fetchAllData(selectedHostel);
-  }, [selectedHostel]);
+  }, [selectedHostel, fetchAllData]);
+
+  // Filtered Outpasses
+  const filteredOutpasses = useMemo(() => {
+    return adminOutpasses.filter(p => {
+      const matchesStatus = outpassStatusFilter === 'all' || p.status === outpassStatusFilter;
+      const studentName = p.student ? `${p.student.firstName || ''} ${p.student.lastName || ''}`.trim() : '';
+      const matchesSearch = !outpassSearch.trim() || 
+        studentName.toLowerCase().includes(outpassSearch.toLowerCase()) ||
+        (p.student?.prn || '').toLowerCase().includes(outpassSearch.toLowerCase()) ||
+        (p.passCode || '').toLowerCase().includes(outpassSearch.toLowerCase());
+      return matchesStatus && matchesSearch;
+    });
+  }, [adminOutpasses, outpassStatusFilter, outpassSearch]);
+
+  // Filtered Gate Movements
+  const filteredGateMovements = useMemo(() => {
+    if (!gateAttendance?.movements) return [];
+    return gateAttendance.movements.filter(m => {
+      const matchesStatus =
+        gateFilterStatus === 'all' ||
+        (gateFilterStatus === 'currently_out' && m.status === 'CURRENTLY OUT') ||
+        (gateFilterStatus === 'returned' && m.status === 'RETURNED') ||
+        (gateFilterStatus === 'overdue' && m.status === 'OVERDUE');
+
+      const matchesSearch =
+        !gateSearchPRN.trim() ||
+        (m.prn || '').toLowerCase().includes(gateSearchPRN.toLowerCase()) ||
+        (m.studentName || '').toLowerCase().includes(gateSearchPRN.toLowerCase()) ||
+        (m.passCode || '').toLowerCase().includes(gateSearchPRN.toLowerCase());
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [gateAttendance, gateFilterStatus, gateSearchPRN]);
+
+  // Active Hostel Breakdown for card metrics
+  const activeBreakdown = useMemo(() => {
+    if (!stats?.hostelsBreakdown) return null;
+    if (selectedHostel === 'all') return null;
+    return stats.hostelsBreakdown.find(h => h.name === selectedHostel);
+  }, [stats, selectedHostel]);
 
   // Auth Guard
   if (authLoading) {
@@ -468,8 +548,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         toast({ title: "Not Found", description: data.message || "No student found with this PRN", variant: "destructive" });
         setSearchedStudent(null);
       }
-    } catch (e: any) {
-      toast({ title: "Search Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to search student";
+      toast({ title: "Search Error", description: message, variant: "destructive" });
     } finally {
       setIsSearchingStudent(false);
     }
@@ -503,8 +584,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
       } else {
         toast({ title: "Allocation Failed", description: data.message || "Failed to allocate room", variant: "destructive" });
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to allocate room";
+      toast({ title: "Error", description: message, variant: "destructive" });
     } finally {
       setIsAllocating(false);
     }
@@ -527,8 +609,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         const data = await res.json();
         toast({ title: "Error", description: data.message || "Failed to reject registration", variant: "destructive" });
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to reject registration";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -553,8 +636,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         const data = await res.json();
         toast({ title: "Approval Failed", description: data.message, variant: "destructive" });
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to reject registration";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -576,8 +660,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         const data = await res.json();
         toast({ title: "Rejection Failed", description: data.message, variant: "destructive" });
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to reject registration";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -607,8 +692,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         const data = await res.json();
         toast({ title: "Failed to Publish", description: data.message, variant: "destructive" });
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to reject registration";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -621,8 +707,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         toast({ title: "Notice Removed", description: "Notice deleted successfully." });
         fetchAllData(selectedHostel);
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to reject registration";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -650,8 +737,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         const data = await res.json();
         toast({ title: "Failed to Update", description: data.message, variant: "destructive" });
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to reject registration";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -685,8 +773,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         const data = await res.json();
         toast({ title: "Failed to Add Route", description: data.message, variant: "destructive" });
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to reject registration";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -699,8 +788,9 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         toast({ title: "Route Deleted", description: "Bus route deleted." });
         fetchAllData(selectedHostel);
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to reject registration";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -716,50 +806,11 @@ export const AdminDashboard: React.FC<{ defaultTab?: string }> = ({ defaultTab }
         const data = await res.json();
         toast({ title: "Delete Failed", description: data.message, variant: "destructive" });
       }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "An error occurred";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
-
-  // Filtered Outpasses
-  const filteredOutpasses = useMemo(() => {
-    return adminOutpasses.filter(p => {
-      const matchesStatus = outpassStatusFilter === 'all' || p.status === outpassStatusFilter;
-      const studentName = p.student ? `${p.student.firstName || ''} ${p.student.lastName || ''}`.trim() : '';
-      const matchesSearch = !outpassSearch.trim() || 
-        studentName.toLowerCase().includes(outpassSearch.toLowerCase()) ||
-        (p.student?.prn || '').toLowerCase().includes(outpassSearch.toLowerCase()) ||
-        (p.passCode || '').toLowerCase().includes(outpassSearch.toLowerCase());
-      return matchesStatus && matchesSearch;
-    });
-  }, [adminOutpasses, outpassStatusFilter, outpassSearch]);
-
-  // Filtered Gate Movements
-  const filteredGateMovements = useMemo(() => {
-    if (!gateAttendance?.movements) return [];
-    return gateAttendance.movements.filter(m => {
-      const matchesStatus =
-        gateFilterStatus === 'all' ||
-        (gateFilterStatus === 'currently_out' && m.status === 'CURRENTLY OUT') ||
-        (gateFilterStatus === 'returned' && m.status === 'RETURNED') ||
-        (gateFilterStatus === 'overdue' && m.status === 'OVERDUE');
-
-      const matchesSearch =
-        !gateSearchPRN.trim() ||
-        (m.prn || '').toLowerCase().includes(gateSearchPRN.toLowerCase()) ||
-        (m.studentName || '').toLowerCase().includes(gateSearchPRN.toLowerCase()) ||
-        (m.passCode || '').toLowerCase().includes(gateSearchPRN.toLowerCase());
-
-      return matchesStatus && matchesSearch;
-    });
-  }, [gateAttendance, gateFilterStatus, gateSearchPRN]);
-
-  // Active Hostel Breakdown for card metrics
-  const activeBreakdown = useMemo(() => {
-    if (!stats?.hostelsBreakdown) return null;
-    if (selectedHostel === 'all') return null;
-    return stats.hostelsBreakdown.find(h => h.name === selectedHostel);
-  }, [stats, selectedHostel]);
 
   return (
     <div className="min-h-screen bg-background">

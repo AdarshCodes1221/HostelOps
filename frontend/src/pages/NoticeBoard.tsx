@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/ui/navigation';
 import Footer from '@/components/ui/footer';
@@ -42,9 +42,34 @@ const NoticeBoard = () => {
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [showImageModal, setShowImageModal] = useState(false);
 
+  const fetchNotices = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await authenticatedFetch(API_ENDPOINTS.NOTICES_ALL);
+      const data = await response.json();
+      if (response.ok && data?.data) {
+        setNotices(data.data);
+      } else {
+        setNotices([]);
+      }
+    } catch (error) {
+      console.error('Error fetching notices:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not load notices',
+        variant: 'destructive'
+      });
+      setNotices([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
   useEffect(() => {
     fetchNotices();
-  }, []);
+  }, [fetchNotices]);
+
+
 
   // Auth guard
   if (authLoading) {
@@ -63,29 +88,6 @@ const NoticeBoard = () => {
     return null;
   }
 
-  const fetchNotices = async () => {
-    try {
-      setIsLoading(true);
-      const response = await authenticatedFetch(API_ENDPOINTS.NOTICES_ALL);
-      const data = await response.json();
-
-      if (response.ok && data?.data) {
-        setNotices(data.data);
-      } else {
-        setNotices([]);
-      }
-    } catch (error) {
-      console.error('Error fetching notices:', error);
-      toast({
-        title: 'Error',
-        description: 'Could not load notices',
-        variant: 'destructive'
-      });
-      setNotices([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -206,10 +208,10 @@ const NoticeBoard = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
@@ -217,7 +219,7 @@ const NoticeBoard = () => {
     <>
       <div className="min-h-screen bg-background">
         <Navigation />
-        
+
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
@@ -329,7 +331,7 @@ const NoticeBoard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {notices.map((notice) => (
                 <Card key={notice._id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div 
+                  <div
                     className="relative cursor-pointer group"
                     onClick={() => {
                       setSelectedNotice(notice);

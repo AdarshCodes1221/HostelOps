@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -117,7 +117,12 @@ interface WardenOutpass {
     lastName: string;
     role: string;
   };
-  auditLog?: Array<any>;
+  auditLog?: Array<{
+    action?: string;
+    performedBy?: string | { firstName?: string; lastName?: string; role?: string };
+    timestamp?: string;
+    remarks?: string;
+  }>;
 }
 
 interface RoomOccupant {
@@ -135,7 +140,7 @@ interface RoomDoc {
   capacity: number;
   occupants?: RoomOccupant[];
   isOccupied?: boolean;
-  hostel?: any;
+  hostel?: string | { _id: string; name: string };
 }
 
 interface HostelDetails {
@@ -217,14 +222,14 @@ const WardenDashboard: React.FC<WardenDashboardProps> = ({ defaultTab }) => {
     adminNotes: ''
   });
 
-  const [selectedStudentForAllocation, setSelectedStudentForAllocation] = useState<any>(null);
+  const [selectedStudentForAllocation, setSelectedStudentForAllocation] = useState<WardenStudent | null>(null);
   const [allocationFloor, setAllocationFloor] = useState('');
   const [allocationRoomNumber, setAllocationRoomNumber] = useState('');
   const [isAllocationDialogOpen, setIsAllocationDialogOpen] = useState(false);
 
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
-  const [selectedStudentForReject, setSelectedStudentForReject] = useState<any>(null);
+  const [selectedStudentForReject, setSelectedStudentForReject] = useState<WardenStudent | null>(null);
 
   const [selectedOutpass, setSelectedOutpass] = useState<WardenOutpass | null>(null);
   const [outpassRemarks, setOutpassRemarks] = useState('');
@@ -253,7 +258,7 @@ const WardenDashboard: React.FC<WardenDashboardProps> = ({ defaultTab }) => {
     if (newTab !== activeTab) {
       setActiveTab(newTab);
     }
-  }, [location.pathname, defaultTab, searchParams]);
+  }, [location.pathname, defaultTab, searchParams, activeTab]);
 
   const handleTabChange = (val: string) => {
     setActiveTab(val);
@@ -352,7 +357,7 @@ const WardenDashboard: React.FC<WardenDashboardProps> = ({ defaultTab }) => {
     }
   };
 
-  const refreshAll = async () => {
+  const refreshAll = useCallback(async () => {
     setLoading(true);
     await Promise.all([
       fetchDashboardData(),
@@ -364,11 +369,11 @@ const WardenDashboard: React.FC<WardenDashboardProps> = ({ defaultTab }) => {
       fetchWardenOutpasses()
     ]);
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     refreshAll();
-  }, []);
+  }, [refreshAll]);
 
   // Deep linking handler from URL query params
   useEffect(() => {

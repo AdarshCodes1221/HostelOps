@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Navigation } from '@/components/ui/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -84,7 +84,7 @@ const Outpass: React.FC = () => {
         });
       }
     }
-  }, [isLoading, searchParams, outpasses]);
+  }, [isLoading, searchParams, outpasses, toast]);
 
   // Form State
   const [reason, setReason] = useState('');
@@ -95,7 +95,7 @@ const Outpass: React.FC = () => {
   const [emergencyContact, setEmergencyContact] = useState(user?.phone || '');
   const [parentContact, setParentContact] = useState(user?.emergencyContact || '');
 
-  const fetchMyOutpasses = async () => {
+  const fetchMyOutpasses = useCallback(async () => {
     try {
       setIsLoading(true);
       const res = await authenticatedFetch(API_ENDPOINTS.OUTPASS_MY);
@@ -118,11 +118,11 @@ const Outpass: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchMyOutpasses();
-  }, []);
+  }, [fetchMyOutpasses]);
 
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();

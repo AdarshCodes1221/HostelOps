@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -156,7 +156,7 @@ const SuperAdminDashboard: React.FC = () => {
   const [isRoomsModalOpen, setIsRoomsModalOpen] = useState(false);
 
   // Fetch Dashboard summary statistics
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const res = await authenticatedFetch(API_ENDPOINTS.SUPER_ADMIN_DASHBOARD);
       if (res.ok) {
@@ -174,10 +174,10 @@ const SuperAdminDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   // Fetch users with current query parameters
-  const fetchUsers = async (
+  const fetchUsers = useCallback(async (
     targetPage = page,
     targetRole = roleFilter,
     targetStatus = statusFilter,
@@ -230,13 +230,13 @@ const SuperAdminDashboard: React.FC = () => {
     } finally {
       setTableLoading(false);
     }
-  };
+  }, [page, roleFilter, statusFilter, searchQuery, hostelFilter, limit, toast]);
 
   // Initial load
   useEffect(() => {
     fetchDashboardData();
     fetchUsers(1, "all", "all", "", "all", 10);
-  }, []);
+  }, [fetchDashboardData, fetchUsers]);
 
   // Card click handler
   const handleCardClick = (cardKey: string) => {
@@ -388,11 +388,12 @@ const SuperAdminDashboard: React.FC = () => {
           variant: "destructive",
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error updating role:", err);
+      const message = err instanceof Error ? err.message : "Network error occurred while saving role.";
       toast({
         title: "Error",
-        description: err.message || "Network error occurred while saving role.",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -458,11 +459,12 @@ const SuperAdminDashboard: React.FC = () => {
           variant: "destructive",
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting user:", err);
+      const message = err instanceof Error ? err.message : "Network error deleting user.";
       toast({
         title: "Error",
-        description: err.message || "Network error deleting user.",
+        description: message,
         variant: "destructive",
       });
     } finally {

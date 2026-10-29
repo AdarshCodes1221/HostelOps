@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,7 +79,7 @@ const VerifyOutpass: React.FC = () => {
     }
   };
 
-  const verifyPass = async (codeToVerify: string) => {
+  const verifyPass = useCallback(async (codeToVerify: string) => {
     if (!codeToVerify.trim()) return;
 
     setIsLoading(true);
@@ -112,13 +112,13 @@ const VerifyOutpass: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isSecurity]);
 
   useEffect(() => {
     if (codeParam) {
       verifyPass(codeParam);
     }
-  }, [codeParam]);
+  }, [codeParam, verifyPass]);
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-between p-4 sm:p-8">
