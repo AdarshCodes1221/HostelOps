@@ -15,7 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import {
   Users, Home, DoorOpen, CheckCircle, AlertCircle, FileText,
-  Loader2, LogOut, QrCode, ArrowRightLeft, RefreshCw,
+  Loader2, QrCode, ArrowRightLeft, RefreshCw,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authenticatedFetch, API_ENDPOINTS } from "@/lib/api-config";

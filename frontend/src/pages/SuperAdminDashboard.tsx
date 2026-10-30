@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,14 +23,10 @@ import {
   Shield,
   ShieldAlert,
   Search,
-  Filter,
   RefreshCw,
   Eye,
   Edit,
   Trash2,
-  CheckCircle,
-  XCircle,
-  Clock,
   ChevronLeft,
   ChevronRight,
   ExternalLink,

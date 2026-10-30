@@ -30,13 +30,9 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Phone,
   ShieldCheck,
-  AlertCircle,
   Plus,
   Loader2,
-  CheckCircle2,
-  XCircle,
   Printer,
 } from 'lucide-react';
 

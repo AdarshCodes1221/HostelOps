@@ -8,15 +8,9 @@ import { API_BASE_URL, API_ENDPOINTS, authenticatedFetch } from '@/lib/api-confi
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ShieldCheck,
-  ShieldAlert,
   ShieldX,
   Loader2,
   CheckCircle2,
-  Calendar,
-  Clock,
-  MapPin,
-  User,
-  Home,
   ArrowLeft,
   QrCode,
 } from 'lucide-react';

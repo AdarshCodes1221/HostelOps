@@ -7,10 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { MapPin, Clock, Bus, Navigation as NavigationIcon, Route, Edit, Trash2, Plus, Loader2, Upload } from 'lucide-react';
+import { MapPin, Clock, Bus, Edit, Trash2, Plus, Loader2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { authenticatedFetch, API_ENDPOINTS } from '@/lib/api-config';
@@ -30,19 +29,19 @@ const BusRoutes = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [routes, setRoutes] = useState<BusRoute[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState('');
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  
+
   // Image upload states
   const [busRouteImage, setBusRouteImage] = useState<{ imageUrl: string } | null>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  
+
   const [editFormData, setEditFormData] = useState({
     id: '',
     routeName: '',
@@ -55,7 +54,7 @@ const BusRoutes = () => {
     try {
       setIsLoading(true);
       const response = await authenticatedFetch(API_ENDPOINTS.BUS_ROUTES_ALL);
-      
+
       if (response.ok) {
         const data = await response.json();
         setRoutes(data.data || []);
@@ -182,8 +181,8 @@ const BusRoutes = () => {
   };
 
   const handleSaveRoute = async () => {
-    if (!editFormData.routeName || editFormData.stops.filter(s => s.trim()).length === 0 || 
-        editFormData.timings.filter(t => t.trim()).length === 0) {
+    if (!editFormData.routeName || editFormData.stops.filter(s => s.trim()).length === 0 ||
+      editFormData.timings.filter(t => t.trim()).length === 0) {
       toast({
         title: "Validation Error",
         description: "Please fill all required fields",
@@ -196,7 +195,7 @@ const BusRoutes = () => {
     try {
       const filteredStops = editFormData.stops.filter(s => s.trim() !== '');
       const filteredTimings = editFormData.timings.filter(t => t.trim() !== '');
-      
+
       let response;
       if (editFormData.id) {
         // Update existing
@@ -335,7 +334,7 @@ const BusRoutes = () => {
 
   const renderRouteCard = (route: BusRoute) => {
     const hasImage = route.imageUrl && route.imageUrl.trim() !== '';
-    
+
     return (
       <Card key={route._id} className="shadow-card">
         <CardHeader>
@@ -356,8 +355,8 @@ const BusRoutes = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedRoute(selectedRoute === route._id ? '' : route._id)}
               >
@@ -386,7 +385,7 @@ const BusRoutes = () => {
             </div>
           </div>
         </CardHeader>
-        
+
         {selectedRoute === route._id && (
           <CardContent>
             <div className="space-y-4">
@@ -401,7 +400,7 @@ const BusRoutes = () => {
                   />
                 </div>
               )}
-              
+
               {/* Show details only if no image */}
               {!hasImage && (
                 <>
@@ -413,17 +412,16 @@ const BusRoutes = () => {
                     <div className="space-y-2">
                       {route.stops.map((stop, index) => (
                         <div key={index} className="flex items-center space-x-3 p-2 bg-muted/50 rounded-lg">
-                          <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                            index === 0 ? 'bg-success' : 
-                            index === route.stops.length - 1 ? 'bg-destructive' : 
-                            'bg-primary'
-                          }`} />
+                          <div className={`w-3 h-3 rounded-full flex-shrink-0 ${index === 0 ? 'bg-success' :
+                              index === route.stops.length - 1 ? 'bg-destructive' :
+                                'bg-primary'
+                            }`} />
                           <span className="text-sm">{stop}</span>
                         </div>
                       ))}
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-semibold mb-3 flex items-center space-x-2">
                       <Clock className="w-4 h-4" />
@@ -462,299 +460,299 @@ const BusRoutes = () => {
 
   return (
     <>
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
-                Bus Routes & Timings
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Comprehensive transport information for Symbiosis hostels
-              </p>
+      <div className="min-h-screen bg-background">
+        <Navigation />
+
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
+                  Bus Routes & Timings
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                  Comprehensive transport information for Symbiosis hostels
+                </p>
+              </div>
+              {isAdmin && (
+                <Button
+                  onClick={handleAddNewRoute}
+                  className="gradient-primary text-primary-foreground flex items-center space-x-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add New Route</span>
+                </Button>
+              )}
             </div>
-            {isAdmin && (
-              <Button
-                onClick={handleAddNewRoute}
-                className="gradient-primary text-primary-foreground flex items-center space-x-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add New Route</span>
-              </Button>
+          </div>
+
+          {/* Bus Route Image Section */}
+          {isAdmin && (
+            <Card className="shadow-card mb-8 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="w-5 h-5" />
+                  Bus Route Map Image
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col gap-4">
+                  {isImageLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : busRouteImage?.imageUrl ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Current Bus Route Image:</p>
+                      <img
+                        src={busRouteImage.imageUrl}
+                        alt="Bus route map"
+                        className="w-full h-auto max-h-96 object-cover rounded-lg border"
+                        onError={handleImageLoadError}
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No bus route image uploaded yet</p>
+                  )}
+
+                  <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                      onChange={handleImageFileChange}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full"
+                      disabled={isUploadingImage}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {selectedImageFile ? `Selected: ${selectedImageFile.name}` : 'Choose Image (JPG/PNG)'}
+                    </Button>
+                    {selectedImageFile && (
+                      <p className="text-xs text-muted-foreground mt-2">{selectedImageFile.name}</p>
+                    )}
+                  </div>
+
+                  {selectedImageFile && (
+                    <Button
+                      onClick={handleImageUpload}
+                      disabled={isUploadingImage}
+                      className="w-full gradient-primary text-primary-foreground"
+                    >
+                      {isUploadingImage ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload Bus Route Image
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Student View - Show Image if exists */}
+          {!isAdmin && busRouteImage?.imageUrl && (
+            <Card className="shadow-card mb-8">
+              <CardHeader>
+                <CardTitle>Bus Route Map</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <img
+                  src={busRouteImage.imageUrl}
+                  alt="Bus route map"
+                  className="w-full h-auto rounded-lg border"
+                  onError={handleImageLoadError}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="space-y-6">
+            {routes.length === 0 ? (
+              <Card className="shadow-card">
+                <CardContent className="py-12">
+                  <div className="text-center text-muted-foreground">
+                    <Bus className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No bus routes available yet</p>
+                    {isAdmin && <p className="text-sm mt-2">Click "Add New Route" to get started</p>}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <Card className="shadow-card">
+                  <CardHeader>
+                    <CardTitle>Available Bus Routes</CardTitle>
+                    <Select value={selectedRoute} onValueChange={setSelectedRoute}>
+                      <SelectTrigger className="w-full max-w-xs">
+                        <SelectValue placeholder="Quick select route" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {routes.filter(r => r.active).map((route) => (
+                          <SelectItem key={route._id} value={route._id}>
+                            {route.routeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardHeader>
+                </Card>
+
+                <div className="space-y-4">
+                  {routes.filter(r => isAdmin || r.active).map(renderRouteCard)}
+                </div>
+              </>
             )}
           </div>
         </div>
 
-        {/* Bus Route Image Section */}
-        {isAdmin && (
-          <Card className="shadow-card mb-8 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="w-5 h-5" />
-                Bus Route Map Image
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col gap-4">
-                {isImageLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                  </div>
-                ) : busRouteImage?.imageUrl ? (
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Current Bus Route Image:</p>
-                    <img 
-                      src={busRouteImage.imageUrl} 
-                      alt="Bus route map" 
-                      className="w-full h-auto max-h-96 object-cover rounded-lg border"
-                      onError={handleImageLoadError}
-                    />
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">No bus route image uploaded yet</p>
-                )}
+        {/* Edit/Add Route Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editFormData.id ? 'Edit Bus Route' : 'Add New Bus Route'}</DialogTitle>
+              <DialogDescription>
+                {editFormData.id ? 'Update the route details below' : 'Create a new bus route'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Route Name</Label>
+                <Input
+                  value={editFormData.routeName}
+                  onChange={(e) => setEditFormData({ ...editFormData, routeName: e.target.value })}
+                  placeholder="e.g., Pune Station - Hostel"
+                />
+              </div>
 
-                <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                  <Input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,.jpg,.jpeg,.png"
-                    onChange={handleImageFileChange}
-                    className="hidden"
-                  />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Stops</Label>
                   <Button
+                    type="button"
                     variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full"
-                    disabled={isUploadingImage}
+                    size="sm"
+                    onClick={addStopField}
+                    className="flex items-center space-x-1"
                   >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {selectedImageFile ? `Selected: ${selectedImageFile.name}` : 'Choose Image (JPG/PNG)'}
+                    <Plus className="w-3 h-3" />
+                    <span>Add Stop</span>
                   </Button>
-                  {selectedImageFile && (
-                    <p className="text-xs text-muted-foreground mt-2">{selectedImageFile.name}</p>
-                  )}
                 </div>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {editFormData.stops.map((stop, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Input
+                        value={stop}
+                        onChange={(e) => updateStop(index, e.target.value)}
+                        placeholder={`Stop ${index + 1}`}
+                      />
+                      {editFormData.stops.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeStopField(index)}
+                          className="flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                {selectedImageFile && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Timings</Label>
                   <Button
-                    onClick={handleImageUpload}
-                    disabled={isUploadingImage}
-                    className="w-full gradient-primary text-primary-foreground"
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addTimingField}
+                    className="flex items-center space-x-1"
                   >
-                    {isUploadingImage ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload Bus Route Image
-                      </>
-                    )}
+                    <Plus className="w-3 h-3" />
+                    <span>Add Timing</span>
                   </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Student View - Show Image if exists */}
-        {!isAdmin && busRouteImage?.imageUrl && (
-          <Card className="shadow-card mb-8">
-            <CardHeader>
-              <CardTitle>Bus Route Map</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <img 
-                src={busRouteImage.imageUrl} 
-                alt="Bus route map" 
-                className="w-full h-auto rounded-lg border"
-                onError={handleImageLoadError}
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="space-y-6">
-          {routes.length === 0 ? (
-            <Card className="shadow-card">
-              <CardContent className="py-12">
-                <div className="text-center text-muted-foreground">
-                  <Bus className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No bus routes available yet</p>
-                  {isAdmin && <p className="text-sm mt-2">Click "Add New Route" to get started</p>}
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle>Available Bus Routes</CardTitle>
-                  <Select value={selectedRoute} onValueChange={setSelectedRoute}>
-                    <SelectTrigger className="w-full max-w-xs">
-                      <SelectValue placeholder="Quick select route" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {routes.filter(r => r.active).map((route) => (
-                        <SelectItem key={route._id} value={route._id}>
-                          {route.routeName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </CardHeader>
-              </Card>
-              
-              <div className="space-y-4">
-                {routes.filter(r => isAdmin || r.active).map(renderRouteCard)}
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {editFormData.timings.map((timing, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Input
+                        value={timing}
+                        onChange={(e) => updateTiming(index, e.target.value)}
+                        placeholder="e.g., 7:00 AM"
+                      />
+                      {editFormData.timings.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeTimingField(index)}
+                          className="flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </>
-          )}
-        </div>
+
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div className="space-y-1">
+                  <Label>Active Status</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {editFormData.active ? 'Route is visible to students' : 'Route is hidden from students'}
+                  </p>
+                </div>
+                <Switch
+                  checked={editFormData.active}
+                  onCheckedChange={(checked) => setEditFormData({ ...editFormData, active: checked })}
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditDialogOpen(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveRoute}
+                  disabled={isSubmitting}
+                  className="gradient-primary text-primary-foreground"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    editFormData.id ? 'Update Route' : 'Create Route'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Edit/Add Route Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editFormData.id ? 'Edit Bus Route' : 'Add New Bus Route'}</DialogTitle>
-            <DialogDescription>
-              {editFormData.id ? 'Update the route details below' : 'Create a new bus route'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Route Name</Label>
-              <Input
-                value={editFormData.routeName}
-                onChange={(e) => setEditFormData({ ...editFormData, routeName: e.target.value })}
-                placeholder="e.g., Pune Station - Hostel"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Stops</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addStopField}
-                  className="flex items-center space-x-1"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>Add Stop</span>
-                </Button>
-              </div>
-              <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                {editFormData.stops.map((stop, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Input
-                      value={stop}
-                      onChange={(e) => updateStop(index, e.target.value)}
-                      placeholder={`Stop ${index + 1}`}
-                    />
-                    {editFormData.stops.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeStopField(index)}
-                        className="flex-shrink-0"
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Timings</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addTimingField}
-                  className="flex items-center space-x-1"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>Add Timing</span>
-                </Button>
-              </div>
-              <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                {editFormData.timings.map((timing, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Input
-                      value={timing}
-                      onChange={(e) => updateTiming(index, e.target.value)}
-                      placeholder="e.g., 7:00 AM"
-                    />
-                    {editFormData.timings.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeTimingField(index)}
-                        className="flex-shrink-0"
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-              <div className="space-y-1">
-                <Label>Active Status</Label>
-                <p className="text-xs text-muted-foreground">
-                  {editFormData.active ? 'Route is visible to students' : 'Route is hidden from students'}
-                </p>
-              </div>
-              <Switch
-                checked={editFormData.active}
-                onCheckedChange={(checked) => setEditFormData({ ...editFormData, active: checked })}
-              />
-            </div>
-
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveRoute}
-                disabled={isSubmitting}
-                className="gradient-primary text-primary-foreground"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  editFormData.id ? 'Update Route' : 'Create Route'
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-    <Footer />
+      <Footer />
     </>
   );
 };

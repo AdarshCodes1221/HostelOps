@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
-import { authenticatedFetch, API_ENDPOINTS } from '@/lib/api-config';
+import { authenticatedFetch } from '@/lib/api-config';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ComplaintData {

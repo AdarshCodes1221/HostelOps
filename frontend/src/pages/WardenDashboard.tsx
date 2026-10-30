@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Users, Building2, DoorOpen, CheckCircle, XCircle, Clock, AlertCircle,
-  FileText, Loader2, LogOut, QrCode, Search, Phone, Mail, MapPin,
+  Users, Building2, DoorOpen, CheckCircle, AlertCircle,
+  FileText, Loader2, QrCode, Search, Phone,
   ShieldAlert, RefreshCw, ArrowRight, BedDouble, UserCheck
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
