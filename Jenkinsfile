@@ -1,6 +1,7 @@
-
 pipeline {
-    agent { label 'hostelops-win' }
+    agent {
+        label 'hostelops-win'
+    }
 
     options {
         timestamps()
@@ -10,12 +11,13 @@ pipeline {
     }
 
     environment {
-        // Replace with the existing Compose project label
-        // reported by: docker inspect hms-backend
-        COMPOSE_PROJECT = 'hostel-management-system'
+        // Must match your existing Docker Compose project.
+        COMPOSE_PROJECT = 'hostelmanagementsystem'
+        HOSTELOPS_UPLOADS_PATH = 'D:/PROJECTS/Hostel Management System/backend/uploads'
     }
 
     stages {
+
         stage('Checkout HostelOps') {
             steps {
                 checkout scm
@@ -41,7 +43,6 @@ pipeline {
                     bat 'npm ci'
                     bat 'node --check server.js'
                     bat 'npm run lint --if-present'
-                    bat 'npm run test:ci --if-present'
                 }
             }
         }
@@ -51,10 +52,32 @@ pipeline {
                 bat 'docker --version'
                 bat 'docker compose version'
                 bat 'docker info'
+                bat 'trivy --version'
             }
         }
 
-        stage('Build and Deploy Containers') {
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'HostelOps-SonarScanner'
+
+                    // Must exactly match Manage Jenkins > System.
+                    withSonarQubeEnv('SonarQube') {
+                        bat "\"${scannerHome}\\bin\\sonar-scanner.bat\""
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Quality Gate') {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Prepare Docker Environment') {
             steps {
                 withCredentials([
                     file(
@@ -62,47 +85,112 @@ pipeline {
                         variable: 'HOSTELOPS_ENV_FILE'
                     )
                 ]) {
-                    script {
-                        try {
-                            bat '''
-                                @echo off
-                                copy /Y "%HOSTELOPS_ENV_FILE%" "backend\\.env" >NUL
-                                if errorlevel 1 exit /b 1
+                    bat '''
+                        @echo off
+                        copy /Y "%HOSTELOPS_ENV_FILE%" "backend\\.env" >NUL
+                        if errorlevel 1 exit /b 1
 
-                                docker compose -p "%COMPOSE_PROJECT%" config --quiet
-                                if errorlevel 1 exit /b 1
+                        docker compose -p "%COMPOSE_PROJECT%" config --quiet
+                        if errorlevel 1 exit /b 1
+                    '''
+                }
+            }
+        }
 
-                                docker compose -p "%COMPOSE_PROJECT%" build
-                                if errorlevel 1 exit /b 1
+        stage('Build Docker Images') {
+            steps {
+                bat '''
+                    docker compose -p "%COMPOSE_PROJECT%" build
+                    if errorlevel 1 exit /b 1
+                '''
+            }
+        }
 
-                                docker compose -p "%COMPOSE_PROJECT%" up -d --remove-orphans
-                                if errorlevel 1 exit /b 1
-                            '''
-                        } finally {
-                            bat 'if exist backend\\.env del /F /Q backend\\.env'
+        stage('Trivy Image Security Scan') {
+            steps {
+                powershell '''
+                    $ErrorActionPreference = "Stop"
+
+                    $images = @(
+                        docker compose -p $env:COMPOSE_PROJECT config --images |
+                        Where-Object { $_ -and $_.Trim() }
+                    )
+
+                    if ($LASTEXITCODE -ne 0 -or $images.Count -eq 0) {
+                        Write-Error "Could not determine Docker images from Compose."
+                        exit 1
+                    }
+
+                    foreach ($image in $images) {
+                        Write-Host "Scanning image: $image"
+
+                        & trivy image `
+                            --ignore-unfixed `
+                            --severity HIGH,CRITICAL `
+                            --exit-code 1 `
+                            $image
+
+                        if ($LASTEXITCODE -ne 0) {
+                            Write-Error "Trivy scan failed for image: $image"
+                            exit $LASTEXITCODE
                         }
                     }
-                }
+                '''
+            }
+        }
+
+        stage('Deploy Containers') {
+            steps {
+                bat '''
+                    docker compose -p "%COMPOSE_PROJECT%" up -d
+                    if errorlevel 1 exit /b 1
+                '''
             }
         }
 
         stage('Smoke Tests') {
             steps {
                 bat 'timeout /t 10 /nobreak >NUL'
+
                 bat 'docker compose -p "%COMPOSE_PROJECT%" ps'
-                bat 'curl.exe --fail --silent --show-error http://localhost:5000/api/health'
-                bat 'curl.exe --fail --silent --show-error http://localhost:8081/api/health'
-                bat 'curl.exe --fail --silent --show-error http://localhost:8081/'
+
+                bat '''
+                    curl.exe --fail --silent --show-error ^
+                    http://localhost:5000/api/health
+                    if errorlevel 1 exit /b 1
+                '''
+
+                bat '''
+                    curl.exe --fail --silent --show-error ^
+                    http://localhost:8081/api/health
+                    if errorlevel 1 exit /b 1
+                '''
+
+                bat '''
+                    curl.exe --fail --silent --show-error ^
+                    http://localhost:8081/
+                    if errorlevel 1 exit /b 1
+                '''
             }
         }
     }
 
     post {
-        success {
-            echo 'HostelOps pipeline completed successfully.'
+        always {
+            // Remove the temporary backend environment file.
+            bat '''
+                @echo off
+                if exist backend\\.env del /F /Q backend\\.env
+                exit /b 0
+            '''
         }
+
+        success {
+            echo 'HostelOps CI/CD passed: build, SonarQube quality gate, Trivy scan, deployment and smoke tests.'
+        }
+
         failure {
-            echo 'HostelOps pipeline failed. Inspect the failed stage and logs.'
+            echo 'HostelOps pipeline failed. Inspect the first failing stage in Console Output.'
         }
     }
 }

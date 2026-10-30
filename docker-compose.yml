@@ -16,7 +16,9 @@ services:
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8081}
       - REQUIRE_EMAIL_VERIFICATION=${REQUIRE_EMAIL_VERIFICATION:-false}
     volumes:
-      - ./backend/uploads:/app/uploads
+      - type: bind
+        source: ${HOSTELOPS_UPLOADS_PATH:-./backend/uploads}
+        target: /app/uploads
     networks:
       - hms-network
     healthcheck:
