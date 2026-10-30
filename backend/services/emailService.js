@@ -29,13 +29,14 @@ const resolveSenderParts = () => {
   let email = 'noreply@example.com';
 
   if (rawFrom) {
-    const match = rawFrom.match(/^(?:"?([^"]*)"?\s)?<?([^>@]+@[^>]+)>?$/);
+    const match = rawFrom.match(/^(?:(?:"([^"]*)")|(?:([^<"]+)))?\s*<?([^>@\s]+@[^>\s]+)>?$/);
     if (match) {
-      if (match[1] && !name) {
-        name = match[1].trim();
+      const parsedName = (match[1] || match[2] || '').trim();
+      if (parsedName && !name) {
+        name = parsedName;
       }
-      if (match[2]) {
-        email = match[2].trim();
+      if (match[3]) {
+        email = match[3].trim();
       }
     } else if (rawFrom.includes('@')) {
       email = rawFrom.replace(/[<>"]/g, '').trim();
@@ -123,7 +124,7 @@ const getTransporter = async () => {
   if (provider === 'resend' && (smtpPass || process.env.RESEND_API_KEY)) {
     cachedTransporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.resend.com',
-      port: parseInt(process.env.SMTP_PORT, 10) || 465,
+      port: Number.parseInt(process.env.SMTP_PORT, 10) || 465,
       secure: true,
       auth: {
         user: 'resend',
@@ -137,7 +138,7 @@ const getTransporter = async () => {
   // 2. Custom / Standard SMTP
   const smtpHost = process.env.SMTP_HOST;
   if (smtpHost && smtpUser && smtpPass) {
-    const smtpPort = parseInt(process.env.SMTP_PORT, 10) || 587;
+    const smtpPort = Number.parseInt(process.env.SMTP_PORT, 10) || 587;
     const isSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
 
     cachedTransporter = nodemailer.createTransport({
@@ -236,7 +237,7 @@ const sendEmail = async ({ to, toName, subject, html, text }) => {
  * Sends student email verification link and 6-digit OTP
  */
 const sendVerificationEmail = async ({ to, firstName, verificationToken, verificationUrl, otp }) => {
-  const frontendUrl = process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8080';
+  const frontendUrl = process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'https://localhost:8081';
   const verifyLink = verificationUrl || `${frontendUrl}/verify-email?token=${verificationToken || ''}${otp ? `&otp=${otp}` : ''}`;
 
   const html = `
@@ -303,7 +304,7 @@ const sendVerificationEmail = async ({ to, firstName, verificationToken, verific
  * Sends password reset email
  */
 const sendPasswordResetEmail = async ({ to, firstName, resetToken, resetUrl, isAdmin }) => {
-  const frontendUrl = process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8080';
+  const frontendUrl = process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'https://localhost:8081';
   const defaultPath = isAdmin ? '/admin/reset-password' : '/reset-password';
   const resetLink = resetUrl || `${frontendUrl}${defaultPath}/${resetToken}`;
 

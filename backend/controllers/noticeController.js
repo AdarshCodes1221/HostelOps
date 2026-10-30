@@ -39,7 +39,7 @@ exports.createNotice = async (req, res) => {
 
     const { title, description } = req.body;
     const filePath = path.join('uploads', 'notices', req.file.filename);
-    const imageUrl = `${req.protocol}://${req.get('host')}/${filePath.replace(/\\/g, '/')}`;
+    const imageUrl = `${req.protocol}://${req.get('host')}/${filePath.replaceAll('\\', '/')}`;
 
     const notice = await Notice.create({
       title: title || null,

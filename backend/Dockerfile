@@ -11,7 +11,14 @@ COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy application source code
-COPY . .
+COPY config ./config
+COPY controllers ./controllers
+COPY middleware ./middleware
+COPY models ./models
+COPY routes ./routes
+COPY services ./services
+COPY utils ./utils
+COPY server.js balanceHostels.js ./
 
 # Ensure uploads directory and subfolders exist with correct permissions
 RUN mkdir -p uploads/mess-menu uploads/profile-images uploads/bus-routes uploads/notices \

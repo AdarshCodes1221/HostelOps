@@ -18,7 +18,7 @@ const generateToken = (user) => {
   );
 };
 
-const GENERAL_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GENERAL_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const validatePassword = (password) => {
   if (!password || typeof password !== 'string') {
@@ -188,8 +188,8 @@ exports.removeRoomOccupant = async (req, res) => {
 // @access  Private/Admin
 exports.getUsers = async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 50;
+    const page = Number.parseInt(req.query.page, 10) || 1;
+    const limit = Number.parseInt(req.query.limit, 10) || 50;
     const skip = (page - 1) * limit;
 
     const filter = {};
@@ -551,7 +551,7 @@ exports.deleteUser = async (req, res) => {
         const room = await Room.findOneAndUpdate(
           { 
             hostel: hostelDoc._id, 
-            floor: parseInt(user.floor),
+            floor: Number.parseInt(user.floor),
             roomNumber: user.roomNumber.toString()
           },
           { 
@@ -1025,7 +1025,7 @@ exports.approveAndAllocateStudent = async (req, res) => {
       targetRoomQuery.hostel = hostelId;
       targetRoomQuery.roomNumber = roomNumber.toString().trim();
       if (floor !== undefined) {
-        targetRoomQuery.floor = parseInt(floor, 10);
+        targetRoomQuery.floor = Number.parseInt(floor, 10);
       }
     } else {
       return res.status(400).json({
@@ -1239,7 +1239,7 @@ exports.reassignStudentRoom = async (req, res) => {
       targetRoomQuery.hostel = newHostelId;
       targetRoomQuery.roomNumber = newRoomNumber.toString().trim();
       if (newFloor !== undefined) {
-        targetRoomQuery.floor = parseInt(newFloor, 10);
+        targetRoomQuery.floor = Number.parseInt(newFloor, 10);
       }
     } else {
       return res.status(400).json({

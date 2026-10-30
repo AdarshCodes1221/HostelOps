@@ -58,7 +58,7 @@ const COLLEGE_EMAIL_DOMAIN = '@sitpune.edu.in';
 const SIT_PUNE_EMAIL_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]*[a-zA-Z0-9])?@sitpune\.edu\.in$/;
 
 // General email regex for admins/wardens
-const GENERAL_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GENERAL_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const validateStudentEmail = (email) => {
   if (!email || typeof email !== 'string') {
@@ -864,7 +864,7 @@ const requestRecoveryEmail = async (req, res) => {
     }
 
     // Generate 6-digit OTP
-    const recoveryOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const recoveryOtp = crypto.randomInt(100000, 1000000).toString();
     const otpHash = crypto.createHash('sha256').update(recoveryOtp).digest('hex');
 
     user.recoveryEmail = cleanRecoveryEmail;

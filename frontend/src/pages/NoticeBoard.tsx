@@ -331,8 +331,9 @@ const NoticeBoard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {notices.map((notice) => (
                 <Card key={notice._id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div
-                    className="relative cursor-pointer group"
+                  <button
+                    type="button"
+                    className="relative cursor-pointer group w-full p-0 border-0 bg-transparent text-left"
                     onClick={() => {
                       setSelectedNotice(notice);
                       setShowImageModal(true);
@@ -344,7 +345,7 @@ const NoticeBoard = () => {
                       className="w-full h-64 object-cover transition-transform group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                  </div>
+                  </button>
                   <CardContent className="p-4">
                     {notice.title && (
                       <h3 className="font-semibold text-lg mb-2">{notice.title}</h3>

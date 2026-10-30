@@ -58,6 +58,7 @@ class ErrorBoundary extends React.Component<
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <button
+              type="button"
               onClick={() => {
                 this.setState({ hasError: false });
                 window.location.href = '/';

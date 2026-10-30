@@ -93,7 +93,7 @@ async function runAllTests() {
   console.log(`📡 Test server running on ${baseUrl}\n`);
 
   const uniqueId = Date.now();
-  const randDigit = (len) => Math.floor(Math.random() * Math.pow(10, len)).toString().padStart(len, '0');
+  const randDigit = (len) => crypto.randomInt(0, Math.pow(10, len)).toString().padStart(len, '0');
   const testStudentEmail = `test.student.${uniqueId}.${randDigit(4)}@sitpune.edu.in`;
   const testStudentPrn = `PRN${uniqueId.toString().slice(-5)}${randDigit(4)}`;
   const testStudentPhone = `98${randDigit(8)}`;

@@ -49,7 +49,17 @@ for (const sub of subDirs) {
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allows frontend to render uploaded images
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: ["'self'", 'http://localhost:5000', 'http://localhost:8081', 'https:', 'wss:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
   })
 );
 

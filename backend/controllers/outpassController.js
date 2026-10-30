@@ -62,7 +62,7 @@ exports.createOutpass = async (req, res) => {
     const depDate = new Date(departureDate);
     const retDate = new Date(expectedReturnDate);
 
-    if (isNaN(depDate.getTime()) || isNaN(retDate.getTime())) {
+    if (Number.isNaN(depDate.getTime()) || Number.isNaN(retDate.getTime())) {
       return res.status(400).json({
         success: false,
         message: 'Invalid departure or return date format',
@@ -315,8 +315,8 @@ exports.getAllOutpasses = async (req, res) => {
   try {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
 
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 100;
+    const page = Number.parseInt(req.query.page, 10) || 1;
+    const limit = Number.parseInt(req.query.limit, 10) || 100;
     const skip = (page - 1) * limit;
 
     const now = new Date();

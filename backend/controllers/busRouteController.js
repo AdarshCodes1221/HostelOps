@@ -138,7 +138,7 @@ exports.uploadRouteImage = async (req, res) => {
     }
 
     const filePath = path.join('uploads', 'bus-routes', req.file.filename);
-    const imageUrl = `${req.protocol}://${req.get('host')}/${filePath.replace(/\\/g, '/')}`;
+    const imageUrl = `${req.protocol}://${req.get('host')}/${filePath.replaceAll('\\', '/')}`;
 
     console.log('Image URL:', imageUrl);
 

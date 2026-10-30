@@ -14,7 +14,7 @@ const connectDB = async () => {
     const mongoURI = process.env.MONGO_URI;
 
     console.log('🔄 Connecting to MongoDB...');
-    console.log('   URI:', mongoURI ? mongoURI.replace(/:([^@]+)@/, ':****@') : 'undefined');
+    console.log('   URI:', mongoURI ? mongoURI.replace(/:[^:@/]+@/, ':****@') : 'undefined');
 
     const conn = await mongoose.connect(mongoURI, {
       serverSelectionTimeoutMS: 8000,

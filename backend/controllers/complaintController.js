@@ -153,8 +153,8 @@ exports.getComplaintById = async (req, res) => {
 // @access  Private/Admin/Warden
 exports.getAllComplaints = async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 50;
+    const page = Number.parseInt(req.query.page, 10) || 1;
+    const limit = Number.parseInt(req.query.limit, 10) || 50;
     const skip = (page - 1) * limit;
 
     const filter = {};

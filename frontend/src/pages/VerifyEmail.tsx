@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { API_BASE_URL, API_ENDPOINTS } from '@/lib/api-config';
 import hostelBg from '@/assets/our-hostels-bg1.jpeg';
 
-const GENERAL_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GENERAL_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const VerifyEmail: React.FC = () => {
   const { token: paramToken } = useParams<{ token?: string }>();

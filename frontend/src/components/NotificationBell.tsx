@@ -253,6 +253,12 @@ export const NotificationBell: React.FC = () => {
                   role="button"
                   tabIndex={0}
                   onClick={() => handleNotificationClick(n)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleNotificationClick(n);
+                    }
+                  }}
                   className={`p-3.5 flex gap-3 text-left transition hover:bg-muted/50 cursor-pointer ${
                     !n.read ? 'bg-primary/5' : ''
                   }`}

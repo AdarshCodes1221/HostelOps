@@ -356,7 +356,7 @@ const Profile = () => {
   };
 
   const handleSendRecoveryOtp = async () => {
-    if (!newRecoveryEmail || !/^\S+@\S+\.\S+$/.test(newRecoveryEmail)) {
+    if (!newRecoveryEmail || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newRecoveryEmail)) {
       toast({
         title: 'Invalid email',
         description: 'Please enter a valid personal recovery email address.',

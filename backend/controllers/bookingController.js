@@ -6,8 +6,8 @@ const Room = require('../models/Room');
 // @access  Private
 exports.getBookings = async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 20;
+    const page = Number.parseInt(req.query.page, 10) || 1;
+    const limit = Number.parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
 
     const filter = {};

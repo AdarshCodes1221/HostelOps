@@ -36,10 +36,10 @@ const summary = [];
 for (const suite of suites) {
   console.log(`▶ Running: ${suite.name} (${suite.file})...`);
   const startTime = Date.now();
-  const result = spawnSync('node', [path.join(__dirname, suite.file)], {
+  const result = spawnSync(process.execPath, [path.join(__dirname, suite.file)], {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..'),
-    env: process.env,
+    env: { ...process.env },
   });
 
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(1);

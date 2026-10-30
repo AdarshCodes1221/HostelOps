@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('node:crypto');
 require('dotenv').config();
 const User = require('./models/User');
 const Complaint = require('./models/Complaint');
@@ -93,7 +94,7 @@ async function balance() {
       student: orchidStudents[0]._id,
       hostel: 'Orchid Hostel',
       roomNumber: orchidStudents[0].roomNumber || '101',
-      passCode: 'OP-' + Math.floor(100000 + Math.random() * 900000),
+      passCode: 'OP-' + crypto.randomInt(100000, 1000000),
       reason: 'Weekend Home Visit',
       category: 'home',
       destination: 'Mumbai',
@@ -113,7 +114,7 @@ async function balance() {
       student: magnoliaStudents[0]._id,
       hostel: 'Magnolia Hostel',
       roomNumber: magnoliaStudents[0].roomNumber || '205',
-      passCode: 'OP-' + Math.floor(100000 + Math.random() * 900000),
+      passCode: 'OP-' + crypto.randomInt(100000, 1000000),
       reason: 'Academic Conference at SIU Lavale',
       category: 'academic',
       destination: 'Pune City',

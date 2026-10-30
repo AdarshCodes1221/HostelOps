@@ -10,7 +10,7 @@ import { API_BASE_URL, API_ENDPOINTS } from '@/lib/api-config';
 import hostelBg from '@/assets/our-hostels-bg1.jpeg';
 
 // Validation regex
-const GENERAL_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GENERAL_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -184,13 +184,14 @@ const ForgotPassword = () => {
                     <p className="text-xs text-muted-foreground">
                       (Development mode — here is your reset token)
                     </p>
-                    <code
-                      className="block text-xs bg-muted/50 p-2 rounded break-all cursor-pointer"
+                    <button
+                      type="button"
+                      className="block w-full text-xs font-mono bg-muted/50 p-2 rounded break-all cursor-pointer text-left hover:bg-muted"
                       onClick={() => navigator.clipboard.writeText(resetToken)}
                       title="Click to copy"
                     >
                       {resetToken}
-                    </code>
+                    </button>
                     <Button
                       variant="link"
                       className="text-sm"

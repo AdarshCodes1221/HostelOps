@@ -184,7 +184,7 @@ exports.approveAndAllocateHostelStudent = async (req, res) => {
       targetRoomQuery.hostel = hostelId;
       targetRoomQuery.roomNumber = roomNumber.toString().trim();
       if (floor !== undefined) {
-        targetRoomQuery.floor = parseInt(floor, 10);
+        targetRoomQuery.floor = Number.parseInt(floor, 10);
       }
     } else {
       return res.status(400).json({

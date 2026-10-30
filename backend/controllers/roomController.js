@@ -29,19 +29,19 @@ exports.getRooms = async (req, res) => {
     }
 
     if (req.query.select) {
-      const fields = req.query.select.split(',').join(' ');
+      const fields = req.query.select.replaceAll(',', ' ');
       query = query.select(fields);
     }
 
     if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
+      const sortBy = req.query.sort.replaceAll(',', ' ');
       query = query.sort(sortBy);
     } else {
       query = query.sort({ floor: 1, roomNumber: 1 });
     }
 
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 30;
+    const page = Number.parseInt(req.query.page, 10) || 1;
+    const limit = Number.parseInt(req.query.limit, 10) || 30;
     const startIndex = (page - 1) * limit;
     const total = await Room.countDocuments(JSON.parse(queryStr));
 
@@ -142,17 +142,17 @@ exports.createRoom = async (req, res) => {
       });
     }
 
-    const roomFloor = floor !== undefined ? parseInt(floor, 10) : parseInt(cleanRoomNumber.charAt(0), 10);
-    const roomCapacity = capacity !== undefined ? parseInt(capacity, 10) : 3;
+    const roomFloor = floor !== undefined ? Number.parseInt(floor, 10) : Number.parseInt(cleanRoomNumber.charAt(0), 10);
+    const roomCapacity = capacity !== undefined ? Number.parseInt(capacity, 10) : 3;
 
-    if (isNaN(roomCapacity) || roomCapacity < 1) {
+    if (Number.isNaN(roomCapacity) || roomCapacity < 1) {
       return res.status(400).json({ success: false, message: 'Room capacity must be at least 1' });
     }
 
     const room = await Room.create({
       hostel: hostel._id,
       roomNumber: cleanRoomNumber,
-      floor: isNaN(roomFloor) ? 1 : roomFloor,
+      floor: Number.isNaN(roomFloor) ? 1 : roomFloor,
       capacity: roomCapacity,
       price: price || 0,
       amenities: amenities || [],

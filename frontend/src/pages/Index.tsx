@@ -349,10 +349,11 @@ const Index = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {hostels.map((hostel, i) => (
-              <div
+              <button
+                type="button"
                 key={i}
                 onClick={() => setSelectedHostel(hostel)}
-                className="group relative overflow-hidden rounded-3xl p-8 bg-black/75 backdrop-blur-md border border-white/40 hover:border-primary/70 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/30 cursor-pointer"
+                className="w-full text-left group relative overflow-hidden rounded-3xl p-8 bg-black/75 backdrop-blur-md border border-white/40 hover:border-primary/70 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/30 cursor-pointer"
               >
                 {/* Animated gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -407,7 +408,7 @@ const Index = () => {
                     Click to view details →
                   </p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -501,6 +502,7 @@ const Index = () => {
               <div className="flex gap-2">
                 {hostelLifeSlides.map((_, idx) => (
                   <button
+                    type="button"
                     key={idx}
                     onClick={() => handleSlideClick(idx)}
                     className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
@@ -514,6 +516,7 @@ const Index = () => {
               </div>
 
               <Button
+                type="button"
                 variant="outline"
                 size="icon"
                 onClick={nextSlide}

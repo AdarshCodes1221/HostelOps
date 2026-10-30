@@ -1135,7 +1135,7 @@ const SuperAdminDashboard: React.FC = () => {
                     <Select
                       value={limit.toString()}
                       onValueChange={(val) => {
-                        const newLimit = parseInt(val, 10);
+                        const newLimit = Number.parseInt(val, 10);
                         setLimit(newLimit);
                         setPage(1);
                         fetchUsers(1, roleFilter, statusFilter, searchQuery, hostelFilter, newLimit);

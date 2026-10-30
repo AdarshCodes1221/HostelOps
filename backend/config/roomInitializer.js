@@ -39,7 +39,7 @@ const DEFAULT_HOSTELS = [
     email: 'orchid@sitpune.edu.in',
     location: 'East Campus',
     floors: 6,
-    totalRooms: parseInt(process.env.ORCHID_ROOM_COUNT, 10) || 200,
+    totalRooms: Number.parseInt(process.env.ORCHID_ROOM_COUNT, 10) || 200,
   },
 ];
 

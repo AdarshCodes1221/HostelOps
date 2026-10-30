@@ -132,8 +132,8 @@ const isNotificationRead = (notification, userId) => {
 // @access  Private
 exports.getMyNotifications = async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 30;
+    const page = Number.parseInt(req.query.page, 10) || 1;
+    const limit = Number.parseInt(req.query.limit, 10) || 30;
     const skip = (page - 1) * limit;
 
     const query = buildNotificationQuery(req.user);
