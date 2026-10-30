@@ -1,8 +1,8 @@
 # Multi-stage minimal production Dockerfile for HMS Backend
 FROM node:20-alpine AS base
 
-# Install curl / wget for container health checks
-RUN apk add --no-cache wget
+# Upgrade OS packages to apply security patches (e.g. libcrypto3, libssl3) and install wget
+RUN apk upgrade --no-cache && apk add --no-cache wget
 
 WORKDIR /app
 
