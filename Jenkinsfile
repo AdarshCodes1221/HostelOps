@@ -44,7 +44,19 @@ pipeline {
                     bat 'npm ci'
                     bat 'npm run lint --if-present'
                     bat 'npm run build'
+                    bat 'npm test'
+                    bat '''
+                        @echo off
+                        powershell -NoProfile -Command "$c = [System.IO.File]::ReadAllText('coverage/lcov.info'); $fixed = $c -replace '(?m)^SF:', 'SF:frontend/' -replace '\\\\', '/'; [System.IO.File]::WriteAllText('coverage/lcov.info', $fixed)"
+                    '''
                 }
+                bat '''
+                    @echo off
+                    if not exist "frontend\\coverage\\lcov.info" (
+                        echo ERROR: frontend\\coverage\\lcov.info not found.
+                        exit /b 1
+                    )
+                '''
             }
         }
 
@@ -72,6 +84,7 @@ pipeline {
                             if errorlevel 1 exit /b 1
                             npx c8 -r lcov -r text node tests/verify-all.js
                             if errorlevel 1 exit /b 1
+                            powershell -NoProfile -Command "$c = [System.IO.File]::ReadAllText('coverage/lcov.info'); $fixed = $c -replace '(?m)^SF:', 'SF:backend/' -replace '\\\\', '/'; [System.IO.File]::WriteAllText('coverage/lcov.info', $fixed)"
                         '''
                     }
                 }

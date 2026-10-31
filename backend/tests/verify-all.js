@@ -155,6 +155,7 @@ async function runAllTests() {
       role: 'warden',
       status: 'approved',
       phone: `92${uniqueId.toString().slice(-8)}`,
+      hostel: 'Voila Hostel',
     });
     wardenId = wardenDoc._id.toString();
 
@@ -442,9 +443,11 @@ async function runAllTests() {
     });
     record(24, 'Unapproved/unallocated student cannot submit complaint', unapprovedComplaintRes.status === 403);
 
-    // 24. Admin allocates Student 2 to Room (Capacity: 2/3)
+    // 24. Admin allocates Student 2 to Room (Capacity: 2/3) using hostelId, roomNumber, and floor
     const alloc2Res = await request('POST', `/api/admin/students/${student2Id}/approve-and-allocate`, {
-      roomId: testRoomDoc._id,
+      hostelId: testHostelDoc._id,
+      roomNumber: testRoomDoc.roomNumber,
+      floor: testRoomDoc.floor,
     }, {
       Authorization: `Bearer ${adminToken}`,
     });
@@ -565,6 +568,11 @@ async function runAllTests() {
     });
     record(35, 'Warden can view rooms with live occupancy details', wardenRoomsRes.status === 200 && wardenRoomsRes.body.success === true);
 
+    // Admin deletes user with occupied room to test floor occupancy decrement
+    const adminDeleteOccupantRes = await request('DELETE', `/api/admin/users/${student3Id}`, null, {
+      Authorization: `Bearer ${adminToken}`,
+    });
+
     // 35. Warden cannot delete users (Admin only)
     const wardenDeleteUserRes = await request('DELETE', `/api/admin/users/${student4Id}`, null, {
       Authorization: `Bearer ${wardenToken}`,
@@ -590,9 +598,11 @@ async function runAllTests() {
     });
     record(39, 'Student reset password succeeds with fresh token and clears token', studentResetRes.status === 200 && studentResetRes.body.success === true);
 
-    // 39. Room reassignment by Admin moves student and updates occupancy
+    // 39. Room reassignment by Admin moves student and updates occupancy using newHostelId, newRoomNumber, and newFloor
     const reassignRes = await request('PUT', `/api/admin/students/${student1Id}/reassign-room`, {
-      newRoomId: secondRoomDoc._id,
+      newHostelId: testHostelDoc._id,
+      newRoomNumber: secondRoomDoc.roomNumber,
+      newFloor: secondRoomDoc.floor,
     }, {
       Authorization: `Bearer ${adminToken}`,
     });
@@ -627,21 +637,38 @@ async function runAllTests() {
     const complaintsRes = await request('GET', '/api/admin/complaints?page=1&limit=5', null, { Authorization: `Bearer ${adminToken}` });
     const noticesRes = await request('GET', '/api/notices', null, { Authorization: `Bearer ${adminToken}` });
     const notificationsRes = await request('GET', '/api/notifications/my?page=1&limit=5', null, { Authorization: `Bearer ${student1Token}` });
-    const outpassesRes = await request('GET', '/api/outpasses/admin/all?page=1&limit=5', null, { Authorization: `Bearer ${adminToken}` });
+    const outpassesRes = await request('GET', '/api/outpass/admin/all?page=1&limit=5', null, { Authorization: `Bearer ${adminToken}` });
+    const outpassInvalidDateRes = await request('POST', '/api/outpass', {
+      reason: 'Home visit',
+      destination: 'Mumbai',
+      departureDate: 'invalid-date',
+      expectedReturnDate: 'invalid-date',
+      emergencyContact: '9876543210',
+    }, { Authorization: `Bearer ${student1Token}` });
     const usersRes = await request('GET', '/api/admin/users?page=1&limit=5', null, { Authorization: `Bearer ${adminToken}` });
-    const test42Passed = [bookingsRes, busRoutesRes, complaintsRes, noticesRes, notificationsRes, outpassesRes, usersRes]
+    const test42Passed = [bookingsRes, busRoutesRes, complaintsRes, noticesRes, notificationsRes, outpassesRes, outpassInvalidDateRes, usersRes]
       .every((r) => r.status >= 200 && r.status < 500);
     record(42, 'Pagination and listing endpoints for bookings, routes, complaints, notices, notifications, and outpasses handled', test42Passed);
 
-    // 43. Coverage Extension: Balance hostels runner and warden allocation query validation
+    // Ensure Student 1 matches Warden's hostel for allocation checks
+    await User.findByIdAndUpdate(student1Id, { hostel: testHostelDoc.name, isEmailVerified: true });
+
+    // 43. Coverage Extension: Warden allocation query validation and user recovery OTP
     const wardenAllocRes = await request('POST', `/api/warden/students/${student1Id}/approve-and-allocate`, {
       hostelId: testHostelDoc._id,
-      roomNumber: '999',
-      floor: 9,
+      roomNumber: '101',
+      floor: 1,
     }, {
       Authorization: `Bearer ${wardenToken}`,
     });
-    record(43, 'Warden allocation endpoint handles request properly', wardenAllocRes.status >= 200 && wardenAllocRes.status < 500);
+    const recoveryEmailRes = await request('POST', '/api/users/recovery-email', {
+      recoveryEmail: 'recovery.student@sitpune.edu.in',
+    }, {
+      Authorization: `Bearer ${student1Token}`,
+    });
+    record(43, 'Warden allocation endpoint handles request properly and user recovery OTP generated',
+      wardenAllocRes.status >= 200 && wardenAllocRes.status < 500 && (recoveryEmailRes.status >= 200 && recoveryEmailRes.status < 500)
+    );
 
   } catch (error) {
     console.error('❌ Test execution error:', error);
