@@ -5,8 +5,10 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const { initializeHostelRooms } = require("./config/roomInitializer");
 
+const path = require("path");
+
 // Load env variables
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Import models
 const User = require("./models/User");
@@ -28,7 +30,7 @@ async function seed() {
        SUPER ADMIN USER SETUP
     ========================== */
     const superAdminEmail = process.env.INITIAL_SUPER_ADMIN_EMAIL || "superadmin@siu.edu.in";
-    const existingSuperAdmin = await User.findOne({ role: "super_admin" });
+    const existingSuperAdmin = await User.findOne({ email: superAdminEmail });
 
     if (!existingSuperAdmin) {
       // Use environment variable or generate a one-time secure password
@@ -58,7 +60,7 @@ async function seed() {
        ADMIN USER SETUP
     ========================== */
     const adminEmail = process.env.INITIAL_ADMIN_EMAIL || "admin@siu.edu.in";
-    const existingAdmin = await User.findOne({ role: "admin" });
+    const existingAdmin = await User.findOne({ email: adminEmail });
 
     if (!existingAdmin) {
       // Use environment variable or generate a one-time secure password

@@ -25,18 +25,19 @@ let cachedTransporter = null;
  */
 const resolveSenderParts = () => {
   const rawFrom = (process.env.MAIL_FROM || process.env.SMTP_FROM || '').trim();
-  let name = (process.env.MAIL_FROM_NAME || '').trim();
+  let name = (process.env.MAIL_FROM_NAME || '').replace(/^["']|["']$/g, '').trim();
   let email = 'noreply@example.com';
 
   if (rawFrom) {
-    const match = rawFrom.match(/^(?:(?:"([^"]*)")|(?:([^<"]+)))?\s*<?([^>@\s]+@[^>\s]+)>?$/);
-    if (match) {
-      const parsedName = (match[1] || match[2] || '').trim();
-      if (parsedName && !name) {
-        name = parsedName;
-      }
-      if (match[3]) {
-        email = match[3].trim();
+    if (rawFrom.includes('<') && rawFrom.includes('>')) {
+      const match = rawFrom.match(/^(?:"?([^"<]*)"?\s*)?<([^>@\s]+@[^>\s]+)>$/);
+      if (match) {
+        if (match[1] && !name) {
+          name = match[1].trim();
+        }
+        if (match[2]) {
+          email = match[2].trim();
+        }
       }
     } else if (rawFrom.includes('@')) {
       email = rawFrom.replace(/[<>"]/g, '').trim();
@@ -237,7 +238,7 @@ const sendEmail = async ({ to, toName, subject, html, text }) => {
  * Sends student email verification link and 6-digit OTP
  */
 const sendVerificationEmail = async ({ to, firstName, verificationToken, verificationUrl, otp }) => {
-  const frontendUrl = process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'https://localhost:8081';
+  const frontendUrl = process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8081';
   const verifyLink = verificationUrl || `${frontendUrl}/verify-email?token=${verificationToken || ''}${otp ? `&otp=${otp}` : ''}`;
 
   const html = `
@@ -304,7 +305,7 @@ const sendVerificationEmail = async ({ to, firstName, verificationToken, verific
  * Sends password reset email
  */
 const sendPasswordResetEmail = async ({ to, firstName, resetToken, resetUrl, isAdmin }) => {
-  const frontendUrl = process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'https://localhost:8081';
+  const frontendUrl = process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8081';
   const defaultPath = isAdmin ? '/admin/reset-password' : '/reset-password';
   const resetLink = resetUrl || `${frontendUrl}${defaultPath}/${resetToken}`;
 

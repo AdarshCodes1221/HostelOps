@@ -569,7 +569,7 @@ const Login = () => {
                       id="admin-email"
                       name="admin-email"
                       type="email"
-                      placeholder="admin@sitpune.edu.in"
+                      placeholder="admin@siu.edu.in"
                       required
                       className="transition-smooth"
                     />

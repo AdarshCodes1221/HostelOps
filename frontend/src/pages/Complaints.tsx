@@ -69,6 +69,9 @@ interface Complaint {
 
 const Complaints: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const { isAdmin, user } = useAuth();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -111,9 +114,6 @@ const Complaints: React.FC = () => {
     description: '',
     category: undefined,
   });
-
-  const { toast } = useToast();
-  const { isAdmin, user } = useAuth();
 
   const fetchMyComplaints = useCallback(async () => {
     try {
