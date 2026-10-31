@@ -20,25 +20,38 @@ const nodemailer = require('nodemailer');
 
 let cachedTransporter = null;
 
+const ANGLE_EMAIL_REGEX = /<([^>@\s]+@[^>\s]+)>/;
+
+/**
+ * Parses "Name" <email@domain.com> syntax into parts.
+ */
+const parseAngleAddress = (rawFrom) => {
+  const match = ANGLE_EMAIL_REGEX.exec(rawFrom);
+  if (!match) {
+    return null;
+  }
+  const email = match[1].trim();
+  const rawName = rawFrom.slice(0, match.index).replace(/["']/g, '').trim();
+  return { name: rawName, email };
+};
+
 /**
  * Parses MAIL_FROM and MAIL_FROM_NAME into structured { name, email }
  */
 const resolveSenderParts = () => {
   const rawFrom = (process.env.MAIL_FROM || process.env.SMTP_FROM || '').trim();
-  let name = (process.env.MAIL_FROM_NAME || '').replace(/^["']|["']$/g, '').trim();
+  const configuredName = (process.env.MAIL_FROM_NAME || '').replace(/^["']|["']$/g, '').trim();
+
+  let name = configuredName;
   let email = 'noreply@example.com';
 
   if (rawFrom) {
-    if (rawFrom.includes('<') && rawFrom.includes('>')) {
-      const match = rawFrom.match(/^(?:"?([^"<]*)"?\s*)?<([^>@\s]+@[^>\s]+)>$/);
-      if (match) {
-        if (match[1] && !name) {
-          name = match[1].trim();
-        }
-        if (match[2]) {
-          email = match[2].trim();
-        }
+    const parsed = parseAngleAddress(rawFrom);
+    if (parsed) {
+      if (!name && parsed.name) {
+        name = parsed.name;
       }
+      email = parsed.email;
     } else if (rawFrom.includes('@')) {
       email = rawFrom.replace(/[<>"]/g, '').trim();
     }

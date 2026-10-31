@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const { initializeHostelRooms } = require("./config/roomInitializer");
 
-const path = require("path");
+const path = require("node:path");
 
 // Load env variables
 dotenv.config({ path: path.join(__dirname, '.env') });
