@@ -1,6 +1,6 @@
 /**
  * Comprehensive Automated Verification Suite
- * Tests all 40 security, authentication, authorization, allocation, and isolation flows.
+ * Tests all 43 security, authentication, authorization, allocation, and isolation flows.
  */
 
 const http = require('http');
@@ -78,7 +78,7 @@ function record(testNum, title, passed, details = '') {
 
 async function runAllTests() {
   console.log('===============================================================');
-  console.log('🚀 RUNNING 40-POINT PRODUCTION SECURITY & ALLOCATION TEST SUITE');
+  console.log('🚀 RUNNING 43-POINT PRODUCTION SECURITY & ALLOCATION TEST SUITE');
   console.log('===============================================================\n');
 
   // Ensure DB connected
@@ -669,7 +669,7 @@ async function runAllTests() {
       });
       process.exit(1);
     } else {
-      console.log('\n🎉 ALL 40 TESTS PASSED SUCCESSFULLY! Production readiness verified.\n');
+      console.log('\n🎉 ALL 43 TESTS PASSED SUCCESSFULLY! Production readiness verified.\n');
       process.exit(0);
     }
   }

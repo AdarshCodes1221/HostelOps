@@ -54,13 +54,34 @@ pipeline {
 
         stage('Backend CI') {
             steps {
-                dir('backend') {
-                    bat 'node --version'
-                    bat 'npm --version'
-                    bat 'npm ci'
-                    bat 'node --check server.js'
-                    bat 'npm run lint --if-present'
+                withCredentials([
+                    file(
+                        credentialsId: 'hostelops-backend-env',
+                        variable: 'HOSTELOPS_ENV_FILE'
+                    )
+                ]) {
+                    dir('backend') {
+                        bat 'node --version'
+                        bat 'npm --version'
+                        bat 'npm ci'
+                        bat 'node --check server.js'
+                        bat 'npm run lint --if-present'
+                        bat '''
+                            @echo off
+                            copy /Y "%HOSTELOPS_ENV_FILE%" ".env" >NUL
+                            if errorlevel 1 exit /b 1
+                            npx c8 -r lcov -r text node tests/verify-all.js
+                            if errorlevel 1 exit /b 1
+                        '''
+                    }
                 }
+                bat '''
+                    @echo off
+                    if not exist "backend\\coverage\\lcov.info" (
+                        echo ERROR: backend\\coverage\\lcov.info not found.
+                        exit /b 1
+                    )
+                '''
             }
         }
 
