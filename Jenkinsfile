@@ -219,7 +219,7 @@ pipeline {
             steps {
 
                 // Allow containers to initialize
-                bat 'timeout /t 10 /nobreak >NUL'
+                bat 'powershell.exe -NoProfile -NonInteractive -Command "Start-Sleep -Seconds 10"'
 
                 // Check container status
                 bat 'docker compose -p "%COMPOSE_PROJECT%" ps'
