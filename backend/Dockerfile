@@ -1,14 +1,16 @@
 # Multi-stage minimal production Dockerfile for HMS Backend
 FROM node:20-alpine AS base
 
-# Upgrade OS packages to apply security patches (e.g. libcrypto3, libssl3) and install wget
+# Upgrade OS packages to apply security patches and install wget
 RUN apk upgrade --no-cache && apk add --no-cache wget
 
 WORKDIR /app
 
 # Install dependencies (utilizing Docker layer caching)
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production \
+    && npm cache clean --force \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 # Copy application source code
 COPY config ./config
