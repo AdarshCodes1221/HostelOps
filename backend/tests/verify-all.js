@@ -666,8 +666,30 @@ async function runAllTests() {
     }, {
       Authorization: `Bearer ${student1Token}`,
     });
+
+    // Verify emailService sender resolution permutations
+    const emailService = require('../services/emailService');
+    const origFrom = process.env.MAIL_FROM;
+    const origName = process.env.MAIL_FROM_NAME;
+
+    process.env.MAIL_FROM = '"Custom Admin" <custom@sitpune.edu.in>';
+    delete process.env.MAIL_FROM_NAME;
+    const p1 = emailService.resolveSenderParts();
+
+    process.env.MAIL_FROM = '<angleonly@sitpune.edu.in>';
+    const p2 = emailService.resolveSenderParts();
+
+    process.env.MAIL_FROM = 'bare@sitpune.edu.in';
+    process.env.MAIL_FROM_NAME = 'Custom System';
+    const p3 = emailService.resolveSenderParts();
+
+    emailService.resolveSender();
+
+    if (origFrom !== undefined) process.env.MAIL_FROM = origFrom; else delete process.env.MAIL_FROM;
+    if (origName !== undefined) process.env.MAIL_FROM_NAME = origName; else delete process.env.MAIL_FROM_NAME;
+
     record(43, 'Warden allocation endpoint handles request properly and user recovery OTP generated',
-      wardenAllocRes.status >= 200 && wardenAllocRes.status < 500 && (recoveryEmailRes.status >= 200 && recoveryEmailRes.status < 500)
+      wardenAllocRes.status >= 200 && wardenAllocRes.status < 500 && (recoveryEmailRes.status >= 200 && recoveryEmailRes.status < 500) && p1.email === 'custom@sitpune.edu.in' && p2.email === 'angleonly@sitpune.edu.in' && p3.email === 'bare@sitpune.edu.in'
     );
 
   } catch (error) {

@@ -20,18 +20,20 @@ const nodemailer = require('nodemailer');
 
 let cachedTransporter = null;
 
-const ANGLE_EMAIL_REGEX = /<([^>@\s]+@[^>\s]+)>/;
-
 /**
- * Parses "Name" <email@domain.com> syntax into parts.
+ * Parses "Name" <email@domain.com> syntax into parts without regex.
  */
 const parseAngleAddress = (rawFrom) => {
-  const match = ANGLE_EMAIL_REGEX.exec(rawFrom);
-  if (!match) {
+  const startIdx = rawFrom.indexOf('<');
+  const endIdx = rawFrom.lastIndexOf('>');
+  if (startIdx === -1 || endIdx <= startIdx + 1) {
     return null;
   }
-  const email = match[1].trim();
-  const rawName = rawFrom.slice(0, match.index).replace(/["']/g, '').trim();
+  const email = rawFrom.slice(startIdx + 1, endIdx).trim();
+  if (!email.includes('@')) {
+    return null;
+  }
+  const rawName = rawFrom.slice(0, startIdx).replace(/["']/g, '').trim();
   return { name: rawName, email };
 };
 

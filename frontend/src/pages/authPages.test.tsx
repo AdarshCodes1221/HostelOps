@@ -1,10 +1,23 @@
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import AdminForgotPassword from "./AdminForgotPassword";
 import ForgotPassword from "./ForgotPassword";
 import VerifyEmail from "./VerifyEmail";
+import Login from "./Login";
+
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    login: vi.fn(),
+    isAuthenticated: false,
+    isAdmin: false,
+    isWarden: false,
+    isSecurity: false,
+    isSuperAdmin: false,
+    user: null,
+  }),
+}));
 
 vi.mock("@/lib/api-config", () => ({
   API_BASE_URL: "http://localhost:5000",
@@ -61,5 +74,16 @@ describe("Auth Pages Form Validation", () => {
     );
 
     expect(screen.getByText(/Verify Your Email/i)).toBeInTheDocument();
+  });
+
+  it("renders Login component and admin email placeholder", () => {
+    render(
+      <MemoryRouter initialEntries={["/admin"]}>
+        <Login />
+      </MemoryRouter>
+    );
+
+    const adminInput = screen.getByPlaceholderText(/admin@siu.edu.in/i);
+    expect(adminInput).toBeInTheDocument();
   });
 });
