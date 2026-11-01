@@ -695,6 +695,22 @@ async function runAllTests() {
   } catch (error) {
     console.error('❌ Test execution error:', error);
   } finally {
+    // Clean up temporary test artifacts created with uniqueId to keep DB clean
+    if (mongoose.connection && mongoose.connection.readyState === 1) {
+      try {
+        const regex = new RegExp(uniqueId.toString());
+        await User.deleteMany({ email: regex });
+        if (testRoomDoc && testRoomDoc._id) {
+          await Room.deleteOne({ _id: testRoomDoc._id });
+        }
+        await Complaint.deleteMany({ roomNumber: `T${uniqueId.toString().slice(-4)}` });
+        await Booking.deleteMany({ checkInDate: { $gte: new Date(Date.now() - 60000) } });
+        await Notification.deleteMany({ createdAt: { $gte: new Date(Date.now() - 60000) } });
+      } catch (cleanErr) {
+        // silent cleanup
+      }
+    }
+
     // Teardown
     if (server) {
       await new Promise((res) => server.close(res));

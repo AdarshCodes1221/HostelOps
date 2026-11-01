@@ -84,3 +84,7 @@ backend/check-all-staff.js
 backend/checkWardens.js
 backend/test-*.js
 backend/verify-*.js
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/*.tfvars
